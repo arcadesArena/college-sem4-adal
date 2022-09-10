@@ -3,69 +3,87 @@ date:
 lab set: 11
 11. Apply Greedy technique to implement a program to find shortest paths to other vertices using Dijkstra's algorithm from a given vertex in a weighted connected graph.
 */
-#include<stdio.h>
-#include<stdlib.h>
-const int max = 10,inf=9999;
-void fndijkstra(int c[max][max],int d[max],int p[max],int s[max],int so,int de,int n){
-    int i,j,a,b,min;
-    for(i=0; i<n; i++){
-        s[i] = 0;
-        d[i] = c[so][i];
-        p[i] = so;
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX 10
+#define INF 9999
+int find_min(int distance[MAX], int visited[MAX], int n)
+{
+    int min = INF;
+    int index = -1;
+    for (int i = 0; i < n; i++)
+    {
+        if (visited[i] == 0 && distance[i] < min)
+        {
+            min = distance[i];
+            index = i;
+        }
     }
-    s[so] = 1;
-    for(i=1; i<n; i++){
-        min = inf;
-        a = -1;
-        for(j=0; j<n; j++){
-            if(s[j] == 0){
-                if(d[j] < min){
-                    min = d[j];
-                    a = j;
+    return index;
+}
+void print_path(int index, int parent[MAX], int source)
+{
+    if (parent[index] == source)
+        printf("%d", source);
+    else
+        print_path(parent[index], parent, source);
+    printf(" --> %d", index);
+}
+void find_djkstra(int graph[MAX][MAX], int n, int source)
+{
+    int distance[MAX], parent[MAX], visited[MAX];
+    int i, index, j;
+    for (i = 0; i < n; i++)
+    {
+        parent[i] = source;
+        distance[i] = graph[source][i];
+        visited[i] = 0;
+    }
+    distance[source] = 0;
+    visited[source] = 1;
+    for (i = 1; i < n; i++)
+    {
+        index = find_min(distance, visited, n);
+        if (index == -1)
+            return;
+        visited[index] = 1;
+        for (j = 0; j < n; j++)
+        {
+            if (visited[j] == 0)
+            {
+                if (distance[index] + graph[index][j] <
+                    distance[j])
+                {
+                    distance[j] = distance[index] +
+                                  graph[index][j];
+                    parent[j] = index;
                 }
             }
         }
-        if(a == -1)
-            return;
-        s[a] = 1;
-        if(a == de)
-            return;
-        for(b=0; b<n; b++){
-            if(s[b] == 0){
-                if(d[a] + c[a][b] < d[b]){
-                    d[b] = d[a] + c[a][b];
-                    p[b] = a;
-                }
-            }
-        }
+        print_path(index, parent, source);
+        printf(" = %d \n", distance[index]);
     }
 }
-int main(){
-    int n,cost[max][max],dist[max],visited[max],path[max],i,j,source,dest;
-    printf("\nEnter the number of nodes : ");
-    scanf("%d",&n);
-    printf("\nEnter the cost matrix : ");
-    for(i=0; i<n; i++)
-        for(j=0; j<n; j++)
-            scanf("%d",&cost[i][j]);
-    for(source = 0; source<n; source++){
-        printf("\nSource vertex : %d shortest path to other vertices \n",source);
-        for(dest = 0; dest<n; dest++){
-            fndijkstra(cost,dist,path,visited,source,dest,n);
-            if(dist[dest] == inf)
-                printf("%d not reachable\n",dest);
-            else{
-                printf("\n");
-                i = dest;
-                do{
-                    printf("%d<--",i);
-                    i = path[i];
-                }
-                while(i != source);
-                printf("%d = %d\n",i,dist[dest]);
-            }
-        }
-        printf("press enter to continue....\n");
+void read_input(int graph[MAX][MAX], int n)
+{
+    int i, j;
+    printf("Enter the adjacency matrix :\n");
+    for (i = 0; i < n; i++)
+    {
+        for (j = 0; j < n; j++)
+            scanf("%d", &graph[i][j]);
+        printf("\n");
     }
+}
+int main()
+{
+    int graph[MAX][MAX], n, source;
+    printf("Enter the number of nodes : ");
+    scanf("%d", &n);
+    read_input(graph, n);
+    printf("\nEnter the source vertex : ");
+    scanf("%d", &source);
+    printf("shortest path : \n");
+    find_djkstra(graph, n, source);
     return 0;
 }
