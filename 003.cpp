@@ -29,18 +29,17 @@ void swapp(int &a, int &b){
 	b = t;
 }
 int partitions(int arr[],int low,int high){
-    int pivot = arr[high];
-	int i = (low - 1);
-	for (int j = low; j <= high - 1; j++)
-	{
-        if (arr[j] < pivot)
-		{
-			i++;
-			swapp(arr[i], arr[j]);
-		}
-	}
-	swapp(arr[i + 1], arr[high]);
-	return (i + 1);
+    int pivot = arr[low];
+    int i=low;
+    int j=high+1;
+    do{
+        do {i++;} while(arr[i]<pivot);
+        do {j--;} while(arr[j]>pivot);
+        swap(arr[i],arr[j]);
+    }while(i<j);
+    swap(arr[i],arr[j]);
+    swap(arr[low],arr[j]);
+    return j;    
 }
 void quickSort(int arr[],int low,int high){
     if (low < high){
