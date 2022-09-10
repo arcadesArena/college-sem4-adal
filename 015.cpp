@@ -3,47 +3,57 @@ date:
 lab set: 15
 15.Apply Back Tracking technique to implement a program on nQueen's problem.
 */
-#include<bits/stdc++.h>
-#include<cmath>
-using namespace std;
-int x[100],countt=0;
-int place(int k,int i){
-    for(int j=1; j<k; j++){
-        if((x[j]==i)||(abs(x[j]-i)==abs(j-k)))
-            return 0;
-    }
-    return  1;
-}
-void nqueens(int k,int n){
-    for(int i=1; i<=n; i++){
-        if (place(k,i)){
-            x[k]=i;
-            if(k==n){
-                countt++;
-                cout<<"\n";
-                for(int j=1; j<=n; j++){
-                    for(int p=1; p<=n; p++){
-                        if(x[j]==p)
-                            cout<<"q\t";
-                        else
-                            cout<<"#\t";
-                    }
-                    cout<<endl;
-                }
-            }
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX 10
+int solutions = 0;
+void showBoard(int table[MAX], int n)
+{
+    int i, j;
+    printf("\nSolution # %d\n\n", ++solutions);
+    for (i = 0; i < n; i++)
+    {
+        for (j = 0; j < n; j++)
+        {
+            if (j == table[i])
+                printf("Q ");
             else
-                nqueens(k+1,n);
+                printf("# ");
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+int checkNext(int table[MAX], int row, int column)
+{
+    for (int i = 0; i < row; i++)
+        if (table[i] == column || abs(table[i] - column) == abs(i - row))
+            return 0;
+    return 1;
+}
+void NQueen(int table[MAX], int row, int column)
+{
+    for (int i = 0; i < column; i++)
+    {
+        if (checkNext(table, row, i))
+        {
+            table[row] = i;
+            if (row == column - 1)
+                showBoard(table, column);
+            NQueen(table, row + 1, column);
         }
     }
 }
-int main(){
+int main()
+{
     int n;
-    cout<<"enter the no. of queens : ";
-    cin>>n;
-    nqueens(1,n);
-    if(countt==0)
-        cout<<"there is no solution\n";
+    int table[MAX];
+    printf("Enter the number of queens : ");
+    scanf("%d", &n);
+    NQueen(table, 0, n);
+    if (solutions)
+        printf("Number of solution for the given problem instance is :%d\n", solutions);
     else
-        cout<<"\nthe no. of solutuons "<<countt;
+        printf("No solution exists for the given problem instance.\n");
     return 0;
 }
