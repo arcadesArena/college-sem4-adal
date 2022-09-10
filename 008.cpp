@@ -3,193 +3,110 @@ date:
 lab set: 8
 8. Apply transform and conquer technique to implement a program to construct an AVL Tree for a given set of elements and display balance factor for each node.
 */
-#include<stdio.h>
-#include<stdlib.h>
-typedef struct node{
-    int data;
-    struct node *left,*right;
-    int ht;
-} node;
-node * insert(node *T,int x){
-    if(T==NULL){
-        T=(node*)malloc(sizeof(node));
-        T->data=x;
-        T->left=NULL;
-        T->right=NULL;
-    }
-    else if(x > T->data){
-        T->right=insert(T->right,x);
-        if(BF(T)==-2)
-            if(x>T->right->data)
-                T=RR(T);
-            else
-                T=RL(T);
-    }
-    else if(x<T->data){
-        T->left=insert(T->left,x);
-        if(BF(T)==2)
-            if(x < T->left->data)
-                T=LL(T);
-            else
-                T=LR(T);
-    }
-    T->ht=height(T);
-    return(T);
+#include <stdio.h>
+#include <stdlib.h>
+struct Node
+{
+    int key;
+    int height;
+    struct Node *left;
+    struct Node *right;
+};
+int max(int a, int b)
+{
+    return (a > b) ? a : b;
 }
-node * Delete(node *T,int x){
-    node *p;
-    if(T==NULL)
-        return NULL;
-    else if(x > T->data){
-        T->right=Delete(T->right,x);
-        if(BF(T)==2)
-            if(BF(T->left)>=0)
-                T=LL(T);
-            else
-                T=LR(T);
-    }
-    else if(x<T->data){
-        T->left=Delete(T->left,x);
-        if(BF(T)==-2)
-            if(BF(T->right)<=0)
-                T=RR(T);
-            else
-                T=RL(T);
-    }
-    else{
-        if(T->right!=NULL){
-            p=T->right;
-            while(p->left!= NULL)
-                p=p->left;
-            T->data=p->data;
-            T->right=Delete(T->right,p->data);
-            if(BF(T)==2)
-                if(BF(T->left)>=0)
-                    T=LL(T);
-                else
-                    T=LR(T);
-        }
-        else
-            return(T->left);
-    }
-    T->ht=height(T);
-    return(T);
+int height(struct Node *root)
+{
+    if (root == NULL)
+        return 0;
+    return 1 + max(height(root->left), height(root->right));
 }
-int height(node *T){
-    int lh,rh;
-    if(T==NULL)
-        return(0);
-    if(T->left==NULL)
-        lh=0;
+struct Node *newnode(int key)
+{
+    struct Node *node = (struct Node *)malloc(sizeof(struct Node));
+    node->key = key;
+    node->right = NULL;
+    node->left = NULL;
+    node->height = 0;
+    return node;
+}
+struct Node *rightRotate(struct Node *root)
+{
+    struct Node *left_subtree = root->left;
+    struct Node *temp = left_subtree->right;
+    left_subtree->right = root;
+    root->left = temp;
+    root->height = height(root);
+    left_subtree->height = height(temp);
+    return left_subtree;
+}
+struct Node *leftRotate(struct Node *root)
+{
+    struct Node *right_subtree = root->right;
+    struct Node *temp = right_subtree->left;
+    right_subtree->left = root;
+    root->right = temp;
+    root->height = height(root);
+    right_subtree->height = height(right_subtree);
+    return right_subtree;
+}
+int getbalance(struct Node *root)
+{
+    if (root == NULL)
+        return 0;
+    return height(root->left) - height(root->right);
+}
+struct Node *insert(struct Node *node, int key)
+{
+    if (node == NULL)
+        return newnode(key);
+    if (key < node->key)
+        node->left = insert(node->left, key);
+    else if (key > node->key)
+        node->right = insert(node->right, key);
     else
-        lh=1+T->left->ht;
-    if(T->right==NULL)
-        rh=0;
-    else
-        rh=1+T->right->ht;
-    if(lh>rh)
-        return(lh);
-    return(rh);
-}
-node * rotateright(node *x){
-    node *y;
-    y=x->left;
-    x->left=y->right;
-    y->right=x;
-    x->ht=height(x);
-    y->ht=height(y);
-    return(y);
-}
-node * rotateleft(node *x){
-    node *y;
-    y=x->right;
-    x->right=y->left;
-    y->left=x;
-    x->ht=height(x);
-    y->ht=height(y);
-    return(y);
-}
-node * RR(node *T){
-    T=rotateleft(T);
-    return(T);
-}
-node * LL(node *T){
-    T=rotateright(T);
-    return(T);
-}
-node * LR(node *T){
-    T->left=rotateleft(T->left);
-    T=rotateright(T);
-    return(T);
-}
-node * RL(node *T){
-    T->right=rotateright(T->right);
-    T=rotateleft(T);
-    return(T);
-}
-int BF(node *T){
-    int lh,rh;
-    if(T==NULL)
-        return(0);
-    if(T->left==NULL)
-        lh=0;
-    else
-        lh=1+T->left->ht;
-    if(T->right==NULL)
-        rh=0;
-    else
-        rh=1+T->right->ht;
-    return(lh-rh);
-}
-void preorder(node *T){
-    if(T!=NULL){
-        printf("%d(Bf=%d)",T->data,BF(T));
-        preorder(T->left);
-        preorder(T->right);
+        return node;
+    node->height = height(node);
+    int balance = getbalance(node);
+    if (balance > 1 && key < node->left->key)
+        return rightRotate(node);
+    if (balance < -1 && key > node->right->key)
+        return leftRotate(node);
+    if (balance > 1 && key > node->left->key)
+    {
+        node->left = leftRotate(node->left);
+        return rightRotate(node);
     }
-}
-void inorder(node *T){
-    if(T!=NULL){
-        inorder(T->left);
-        printf("%d(Bf=%d)",T->data,BF(T));
-        inorder(T->right);
+    if (balance < -1 && key < node->right->key)
+    {
+        node->right = rightRotate(node->right);
+        return leftRotate(node);
     }
+    return node;
 }
-int main(){
-    node *root=NULL;
-    int x,n,i,op;
-    do{
-        printf("\n1)Create:\n2)Insert:\n3)Delete:\n4)Print:\n5)Quit:\nEnter Your Choice:");
-        scanf("%d",&op);
-        switch(op){
-        case 1:
-            printf("\nEnter no. of elements:");
-            scanf("%d",&n);
-            printf("\nEnter tree data:");
-            root=NULL;
-            for(i=0; i<n; i++){
-                scanf("%d",&x);
-                root=insert(root,x);
-            }
-            break;
-        case 2:
-            printf("\nEnter a data:");
-            scanf("%d",&x);
-            root=insert(root,x);
-            break;
-        case 3:
-            printf("\nEnter a data:");
-            scanf("%d",&x);
-            root=Delete(root,x);
-            break;
-        case 4:
-            printf("\nPreorder sequence:\n");
-            preorder(root);
-            printf("\n\nInorder sequence:\n");
-            inorder(root);
-            printf("\n");
-            break;
-        }
-    }while(op!=5);
+void inorder(struct Node *root)
+{
+    if (root == NULL)
+        return;
+    inorder(root->left);
+    printf("%d (%d) ", root->key, getbalance(root));
+    inorder(root->right);
+}
+int main()
+{
+    struct Node *root = NULL;
+    int elements[25], n;
+    printf("Enter no. of elements to be inserted : ");
+    scanf("%d", &n);
+    printf("\nEnter the elements of the tree : ");
+    for (int i = 0; i < n; i++)
+    {
+        scanf("%d", &elements[i]);
+        root = insert(root, elements[i]);
+    }
+    printf("\nInorder traversal of the constructed AVL tree :\n");
+    inorder(root);
+    printf("\n");
     return 0;
 }
