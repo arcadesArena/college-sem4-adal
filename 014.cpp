@@ -3,55 +3,56 @@ date:
 lab set: 14
 14.Apply Back Tracking technique to implement a program to find a subset of a given set S = {s1, s2,.....,sn} of n positive integers whose sum is equal to a given positive integer d. For example, if S= {1, 2, 5, 6, 8} and d = 9 there are two solutions {1,2,6} and {1,8}. A suitable message is to be displayed if the given problem instance doesn't have a solution.
 */
-#include<bits/stdc++.h>
-using namespace std;
-class Subset{
-public:
-    int sett[10],x[10],n,d,c;
-    Subset(){c=0;}
-    void sumOfSubset(int s,int k,int r){
-        x[k]=1;
-        if(s+sett[k]==d){
-            cout<<"Subset = {";
-            for(int i=0;i<=k;i++){
-                if(x[i]){
-                    cout<<sett[i];
-                    if(i!=k){
-                        cout<<",";
-                        c=1;
-                    }
-                }
-            }
-            cout<<"}\n";
-        }
-        else if(s+sett[k]+sett[k+1]<=d)
-            sumOfSubset(s+sett[k],k+1,r-sett[k]);
-        if((s+r-sett[k]>=d) && (s+sett[k+1]<=d)){
-            x[k]=0;
-            sumOfSubset(s,k+1,r-sett[k]);
+#include <stdio.h>
+#define MAX 100
+int stack[MAX];
+int item[MAX];
+int size, top = -1;
+int issolved = 1, count = 0;
+void display()
+{
+    printf("\nSOLUTION %d\n{ ", ++count);
+    for (int i = 0; i <= top; i++)
+        printf("%d ", stack[i]);
+    printf("}\n\n");
+}
+void push(int data)
+{
+    stack[++top] = data;
+}
+void pop()
+{
+    top--;
+}
+void findSubset(int pos, int sum)
+{
+    if (sum > 0)
+    {
+        for (int i = pos; i <= size; i++)
+        {
+            push(i);
+            findSubset(i + 1, sum - item[i]);
+            pop();
         }
     }
-    void check(){
-        if(c==0)
-            cout<<"Not possible"<<endl;
+    if (sum == 0)
+    {
+        display();
+        issolved = 0;
     }
-};
-int main(){
-    int r=0;
-    Subset s;
-    cout<<"Enter the number of elements: ";
-    cin>>s.n;
-    cout<<"Enter the elements\n";
-    for(int i=0;i<s.n;i++)
-        cin>>s.sett[i];
-    cout<<"Enter the sum: ";
-    cin>>s.d;
-    for(int i=0;i<s.n;i++)
-        s.x[i]=0;
-    for(int i=0;i<s.n;i++)
-        r+=s.sett[i];
-    cout<<endl;
-    s.sumOfSubset(0,0,r);
-    s.check();
+}
+int main()
+{
+    int sum;
+    printf("Enter the maximum number of elements : ");
+    scanf("%d", &size);
+    printf("Enter the weights of the elements : \n");
+    for (int i = 1; i <= size; i++)
+        scanf("%d", &item[i]);
+    printf("Enter the total required weight : ");
+    scanf("%d", &sum);
+    findSubset(1, sum);
+    if (issolved)
+        printf("\n\nThe given problem instance doesn't have any solution.\n");
     return 0;
 }
