@@ -1,43 +1,89 @@
 /*
 date:
 lab set: 12
-12. Apply Greedy technique to develop a program to implement Prim’s algorithm to find minimum cost spanning tree of a given weighted graph.
+12. Apply Greedy technique to develop a program to implement Prim's algorithm to find minimum cost spanning tree of a given weighted graph.
 */
-#include <iostream>
-#include <stdlib.h>
-using namespace std;
-int a,b,u,v,n,i,j,m,ne=1;
-int visited[10]= {10};
-int mincost =0;
-int cost [10][10];
-int main(){
-    cout<<"\nprims: enter no. of nodes: ";
-    cin>>n;
-    cout<<"\nenter adj matrix: \n";
-    for(i=1; i<=n; i++){
-        for(j=1; j<=n; j++){
-            cin>>cost[i][j];
-            if(cost[i][j]==0)
-                cost[i][j]=999;
+#include <stdio.h>
+#define MAX 100
+#define INF 999
+int find_min(int distance[MAX], int visited[MAX], int n)
+{
+    int min = INF;
+    int index = -1;
+    for (int i = 0; i < n; i++)
+    {
+        if (visited[i] == 0 && distance[i] < min)
+        {
+            min = distance[i];
+            index = i;
         }
     }
-    visited[1]=1;
-    while(ne<n){
-        for(i=1,m=999; i<=n; i++)
-            for(j=1; j<=n; j++)
-                if(cost[i][j]<m)
-                    if(visited[i]!=0){
-                        m=cost[i][j];
-                        a=u=i;
-                        b=v=j;
-                    }
-        if(visited[u]==0||visited[v]==0){
-            cout<<"\nedge"<<ne++<<":("<<a<<","<<b<<")-->"<<"cost ="<<m;
-            mincost+=m;
-            visited[0]=1;
-        }
-        cost[a][b]=cost[b][a]=999;
+    return index;
+}
+void display(int graph[MAX][MAX], int n)
+{
+    int i, j;
+    for (i = 0; i < n; i++)
+    {
+        for (j = 0; j < n; j++)
+            printf("%d\t", graph[i][j]);
+        printf("\n");
     }
-    cout<<"\nmincost ="<<mincost;
+}
+void prims(int graph[MAX][MAX], int n)
+{
+    int distance[MAX], visited[MAX], parent[MAX];
+    int i, index, j;
+    int tree[MAX][MAX];
+    for (i = 0; i < n; i++)
+    {
+        distance[i] = graph[0][i];
+        visited[i] = 0;
+        parent[i] = 0;
+        for (j = 0; j < n; j++)
+            tree[i][j] = 0;
+    }
+    visited[0] = 1;
+    int sum = 0;
+    for (int count = 0; count < n; count++)
+    {
+        index = find_min(distance, visited, n);
+        sum += graph[parent[index]][index];
+        tree[index][parent[index]] = tree[parent[index]][index] = distance[index];
+        visited[index] = 1;
+        for (j = 0; j < n; j++)
+        {
+            if (visited[j] == 0 && graph[index][j] < distance[j])
+            {
+                distance[j] = graph[index][j];
+                parent[j] = index;
+            }
+        }
+    }
+    if (sum > INF)
+        printf("spanning tree does not exist\n");
+    else
+    {
+        printf("spanning tree\n");
+        display(tree, n);
+    }
+}
+void read_input(int graph[MAX][MAX], int n)
+{
+    int i, j;
+    printf("Enter the adjacency matrix :\n");
+    for (i = 0; i < n; i++)
+    {
+        for (j = 0; j < n; j++)
+            scanf("%d", &graph[i][j]);
+    }
+}
+int main()
+{
+    int graph[MAX][MAX], n;
+    printf("Enter the number of vertices : ");
+    scanf("%d", &n);
+    read_input(graph, n);
+    prims(graph, n);
     return 0;
 }
